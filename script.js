@@ -1,3 +1,4 @@
+// Danh sách học sinh ban đầu (43 học sinh)
 let students = [
     { id: '001', name: 'Quỳnh Anh', gender: 'Nữ', rating: 'A', preferredPair: '' },
     { id: '002', name: 'Đức Anh', gender: 'Nam', rating: 'A', preferredPair: '' },
@@ -27,7 +28,7 @@ let students = [
     { id: '026', name: 'Đức Phong', gender: 'Nam', rating: 'A', preferredPair: '' },
     { id: '027', name: 'Việt Quang', gender: 'Nam', rating: 'A', preferredPair: '' },
     { id: '028', name: 'Ngọc Quý', gender: 'Nam', rating: 'A', preferredPair: '' },
-    { id: '029', name: 'Thanh Sơn', gender: 'Nam', rating: 'A', preferredPair: '' },
+    { id: '029', name: 'Thanh Sơn', gender: 'Nam', rating: 'D', preferredPair: '' },
     { id: '030', name: 'Thanh Thảo', gender: 'Nữ', rating: 'A', preferredPair: '' },
     { id: '031', name: 'Văn Thuận', gender: 'Nam', rating: 'A', preferredPair: '' },
     { id: '032', name: 'Diệu Thúy', gender: 'Nữ', rating: 'A', preferredPair: '' },
@@ -40,10 +41,11 @@ let students = [
     { id: '039', name: 'Yến Vi', gender: 'Nữ', rating: 'A', preferredPair: '' },
     { id: '040', name: 'Khánh Vy', gender: 'Nữ', rating: 'A', preferredPair: '' },
     { id: '041', name: 'Như Ý', gender: 'Nữ', rating: 'A', preferredPair: '' },
-    { id: '042', name: 'Minh Anh', gender: 'Nữ', rating: 'A', preferredPair: '1' },
-    { id: '043', name: 'Thu Hiền', gender: 'Nữ', rating: 'A', preferredPair: '01' }
+    { id: '042', name: 'Minh Anh', gender: 'Nữ', rating: 'A', preferredPair: '' },
+    { id: '043', name: 'Thu Hiền', gender: 'Nữ', rating: 'A', preferredPair: '' }
 ].sort((a, b) => a.name.localeCompare(b.name, 'vi'));
 
+// Gán xếp hạng ngẫu nhiên: 18 học sinh A, 5 học sinh B, C, D, E, F
 const ratings = ['B', 'C', 'D', 'E', 'F'];
 const numPerRating = 5;
 const shuffledStudents = [...students];
@@ -63,6 +65,7 @@ students = shuffledStudents.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
 
 let studentPairs = [];
 
+// Lấy các phần tử HTML
 const els = {
     studentList: document.getElementById('studentList'),
     searchInput: document.getElementById('searchInput'),
@@ -86,12 +89,14 @@ const els = {
     cancelExportBtn: document.getElementById('cancelExportBtn')
 };
 
+// Quản lý trạng thái lịch sử (undo/redo)
 const state = {
     history: [],
     historyIndex: -1,
     maxHistory: 50
 };
 
+// Hàm tiện ích
 const utils = {
     showToast(message, isError = false) {
         els.toast.innerHTML = `
@@ -131,19 +136,24 @@ const utils = {
         return array;
     },
     saveState() {
-        const seatingData = {};
-        document.querySelectorAll('[data-seat]').forEach(seat => {
-            if (seat.textContent) {
-                seatingData[seat.dataset.seat] = seat.textContent;
-            }
-        });
-        state.history = state.history.slice(0, state.historyIndex + 1);
-        state.history.push({ seatingData, students: [...students], studentPairs: [...studentPairs] });
-        if (state.history.length > state.maxHistory) state.history.shift();
-        state.historyIndex = state.history.length - 1;
-        localStorage.setItem('seatingChart', JSON.stringify(seatingData));
-        els.undoBtn.disabled = state.historyIndex <= 0;
-        els.redoBtn.disabled = state.historyIndex >= state.history.length - 1;
+        try {
+            const seatingData = {};
+            document.querySelectorAll('[data-seat]').forEach(seat => {
+                if (seat.textContent) {
+                    seatingData[seat.dataset.seat] = seat.textContent;
+                }
+            });
+            state.history = state.history.slice(0, state.historyIndex + 1);
+            state.history.push({ seatingData, students: [...students], studentPairs: [...studentPairs] });
+            if (state.history.length > state.maxHistory) state.history.shift();
+            state.historyIndex = state.history.length - 1;
+            localStorage.setItem('seatingChart', JSON.stringify(seatingData));
+            els.undoBtn.disabled = state.historyIndex <= 0;
+            els.redoBtn.disabled = state.historyIndex >= state.history.length - 1;
+        } catch (err) {
+            console.error('Lỗi lưu trạng thái:', err);
+            utils.showToast('Lỗi lưu trạng thái: ' + err.message, true);
+        }
     },
     loadState(index) {
         if (index < 0 || index >= state.history.length) return;
@@ -162,6 +172,7 @@ const utils = {
     }
 };
 
+// Xử lý file XLSX
 function parseXlsx(file, callback) {
     if (file.size > 5 * 1024 * 1024) {
         utils.showToast('File quá lớn! Vui lòng chọn file dưới 5MB.', true);
@@ -193,14 +204,15 @@ function parseXlsx(file, callback) {
             utils.showToast('Đã tải danh sách học sinh từ XLSX!');
             utils.setLoading(els.uploadBtn, false);
         } catch (err) {
+            console.error('Lỗi đọc file XLSX:', err);
             utils.showToast('Lỗi khi đọc file XLSX! Vui lòng kiểm tra định dạng file.', true);
-            console.error('XLSX parsing error:', err);
             utils.setLoading(els.uploadBtn, false);
         }
     };
     reader.readAsArrayBuffer(file);
 }
 
+// Khởi tạo danh sách học sinh
 function initStudentList(filteredStudents = students) {
     els.studentList.innerHTML = '';
     filteredStudents.forEach(student => {
@@ -221,6 +233,7 @@ function initStudentList(filteredStudents = students) {
     });
 }
 
+// Khởi tạo sơ đồ chỗ ngồi
 function initSeatingChart() {
     const groups = { group1: 6, group2: 5, group3: 5, group4: 6 };
     for (const [groupId, tableCount] of Object.entries(groups)) {
@@ -275,11 +288,13 @@ function initSeatingChart() {
     }
 }
 
+// Cập nhật danh sách học sinh sau khi xếp
 function updateStudentList(studentName) {
     const studentDiv = Array.from(els.studentList.children).find(div => div.textContent.includes(studentName));
     if (studentDiv) studentDiv.remove();
 }
 
+// Xóa ghế khác của học sinh (tránh nhân đôi)
 function clearOtherSeats(studentName, currentSeat) {
     document.querySelectorAll('[data-seat]').forEach(seat => {
         if (seat !== currentSeat && seat.textContent === studentName) {
@@ -289,23 +304,141 @@ function clearOtherSeats(studentName, currentSeat) {
     });
 }
 
+// Lưu cấu hình (JSON)
 function saveConfiguration() {
-    const seatingData = {};
-    document.querySelectorAll('[data-seat]').forEach(seat => {
-        if (seat.textContent) {
-            seatingData[seat.dataset.seat] = seat.textContent;
-        }
-    });
-    seatingData.pairs = studentPairs;
-    seatingData.students = students;
-    const blob = new Blob([JSON.stringify(seatingData, null, 2)], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `seating-chart-${new Date().toLocaleString('vi-VN').replace(/[\W]+/g, '-')}.json`;
-    link.click();
-    utils.showToast('Đã lưu cấu hình sơ đồ!');
+    try {
+        const seatingData = {};
+        document.querySelectorAll('[data-seat]').forEach(seat => {
+            if (seat.textContent) {
+                seatingData[seat.dataset.seat] = seat.textContent;
+            }
+        });
+        seatingData.pairs = studentPairs;
+        seatingData.students = students;
+        const jsonString = JSON.stringify(seatingData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `seating-chart-${new Date().toLocaleString('vi-VN').replace(/[\W]+/g, '-')}.json`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        utils.showToast('Đã lưu cấu hình sơ đồ!');
+    } catch (err) {
+        console.error('Lỗi lưu cấu hình:', err);
+        utils.showToast('Lỗi lưu cấu hình: ' + err.message, true);
+    }
 }
 
+// Tạo canvas cho xuất ảnh/PDF
+function generateCanvas(title, callback) {
+    if (!els.seatingChart || els.seatingChart.offsetWidth === 0 || els.seatingChart.offsetHeight === 0) {
+        utils.showToast('Sơ đồ lớp học chưa hiển thị đầy đủ. Vui lòng thử lại sau khi load trang.', true);
+        console.error('Seating chart is not visible or does not exist.');
+        callback(null);
+        return;
+    }
+
+    if (typeof html2canvas === 'undefined') {
+        utils.showToast('Thư viện html2canvas chưa load. Kiểm tra script tag.', true);
+        callback(null);
+        return;
+    }
+
+    const fontPromise = document.fonts.ready.catch(err => {
+        console.warn('Font loading failed, falling back to defaults:', err);
+        return Promise.resolve();
+    });
+
+    Promise.race([
+        fontPromise,
+        new Promise(resolve => setTimeout(resolve, 3000))
+    ]).then(() => {
+        const isMobile = window.innerWidth <= 768;
+        const scale = isMobile ? 1.5 : Math.max(1.5, Math.min(window.devicePixelRatio * 2, 3));
+
+        html2canvas(els.seatingChart, {
+            scale: scale,
+            backgroundColor: '#ffffff',
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            windowWidth: document.body.scrollWidth,
+            windowHeight: document.body.scrollHeight,
+            onclone: (document, element) => {
+                element.style.visibility = 'visible';
+                element.style.position = 'relative';
+                element.querySelectorAll('.desk, .seat-filled').forEach(el => {
+                    el.style.background = el.classList.contains('seat-filled') ? '#7AAEC6' : '#D4D2E9';
+                    el.style.fontFamily = 'Inter, Arial, sans-serif';
+                    el.style.fontWeight = '700';
+                    el.style.fontSize = '0.8rem';
+                    el.style.display = 'flex';
+                    el.style.alignItems = 'center';
+                    el.style.justifyContent = 'center';
+                    el.style.textAlign = 'center';
+                    el.style.whiteSpace = 'pre-wrap';
+                    el.style.wordBreak = 'normal';
+                    el.style.padding = '8px';
+                    el.style.boxSizing = 'border-box';
+                });
+                element.querySelectorAll('.table-label').forEach(el => {
+                    el.style.fontFamily = 'Inter, Arial, sans-serif';
+                    el.style.fontWeight = '700';
+                    el.style.fontSize = '1.1rem';
+                });
+            }
+        }).then(canvas => {
+            if (!canvas) {
+                throw new Error('Canvas không được tạo');
+            }
+            const padding = 20;
+            const titleHeight = 80;
+            const legendHeight = 100;
+            const newCanvas = document.createElement('canvas');
+            newCanvas.width = canvas.width + padding * 2;
+            newCanvas.height = canvas.height + titleHeight + legendHeight + padding * 2;
+            const ctx = newCanvas.getContext('2d');
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+
+            ctx.font = 'bold 24px Inter, Arial, sans-serif';
+            ctx.fillStyle = '#1A1A1A';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const date = new Date().toLocaleString('vi-VN');
+            const titleText = `${title} - ${date}`;
+            ctx.fillText(titleText, newCanvas.width / 2, padding + titleHeight / 2);
+
+            ctx.drawImage(canvas, padding, padding + titleHeight);
+
+            const legendY = canvas.height + titleHeight + padding + 30;
+            ctx.font = 'bold 14px Inter, Arial, sans-serif';
+            ctx.fillStyle = '#1A1A1A';
+            ctx.textAlign = 'left';
+            ctx.fillText('Xếp hạng:', padding, legendY);
+            const ratings = ['A', 'B', 'C', 'D', 'E', 'F'];
+            ratings.forEach((rating, index) => {
+                ctx.fillStyle = index < 2 ? '#4A90E2' : index < 4 ? '#F5A623' : '#E94E77';
+                ctx.fillRect(padding + index * 80, legendY + 5, 20, 20);
+                ctx.fillStyle = '#1A1A1A';
+                ctx.fillText(rating, padding + index * 80 + 25, legendY + 18);
+            });
+
+            callback(newCanvas);
+        }).catch(err => {
+            console.error('Canvas generation error:', err);
+            utils.showToast(`Lỗi tạo canvas: ${err.message}. Kiểm tra console để biết thêm chi tiết.`, true);
+            callback(null);
+        });
+    }).catch(err => {
+        console.error('Font loading error:', err);
+        utils.showToast('Lỗi tải font, sử dụng font mặc định nhưng vẫn thử xuất.', true);
+        callback(null);
+    });
+}
+
+// Sự kiện tìm kiếm học sinh
 els.searchInput.addEventListener('input', () => {
     const searchTerm = els.searchInput.value.toLowerCase();
     const filteredStudents = students.filter(student =>
@@ -315,6 +448,7 @@ els.searchInput.addEventListener('input', () => {
     initStudentList(filteredStudents);
 });
 
+// Sự kiện upload file CSV/XLSX
 els.uploadBtn.addEventListener('click', () => els.fileInput.click());
 els.fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -363,13 +497,14 @@ els.fileInput.addEventListener('change', (e) => {
     els.fileInput.value = '';
 });
 
+// Sự kiện xếp chỗ ngẫu nhiên
 els.randomizeBtn.addEventListener('click', () => {
-    // Xóa tất cả ghế hiện tại để bắt đầu xếp lại từ đầu
+    // Xóa tất cả ghế và khôi phục danh sách học sinh
     document.querySelectorAll('[data-seat]').forEach(seat => {
         seat.textContent = '';
         seat.classList.remove('seat-filled');
     });
-    initStudentList(); // Khôi phục danh sách học sinh
+    initStudentList();
 
     // Lấy danh sách ghế trống
     let emptySeats = Array.from(document.querySelectorAll('[data-seat]'));
@@ -378,7 +513,7 @@ els.randomizeBtn.addEventListener('click', () => {
     let remainingStudents = [...students];
     utils.shuffleArray(remainingStudents);
 
-    // Danh sách để theo dõi học sinh đã được xếp
+    // Theo dõi học sinh đã được xếp
     const assignedStudents = new Set();
 
     // Phân loại học sinh theo giới tính và xếp hạng
@@ -464,10 +599,10 @@ els.randomizeBtn.addEventListener('click', () => {
 
     // Hàm gán học sinh vào ghế
     const assignStudent = (student, seats, group, gender) => {
-        if (assignedStudents.has(student.name)) return false; // Bỏ qua nếu học sinh đã được xếp
+        if (assignedStudents.has(student.name)) return false;
         const rating = student.rating;
         const availableTables = seats.reduce((acc, seat) => {
-            if (seat.textContent) return acc; // Chỉ lấy ghế trống
+            if (seat.textContent) return acc;
             const [seatGroup, table] = seat.dataset.seat.split('-');
             if (seatGroup !== group) return acc;
             let tableGroup = acc.find(t => t.table === table);
@@ -482,7 +617,7 @@ els.randomizeBtn.addEventListener('click', () => {
         if (availableTables.length > 0) {
             const table = availableTables[0];
             const seat = table.seats.shift();
-            clearOtherSeats(student.name, seat); // Xóa ghế khác nếu có
+            clearOtherSeats(student.name, seat);
             seat.textContent = student.name;
             seat.classList.add('seat-filled');
             assignedSeats.set(seat, student.name);
@@ -494,11 +629,14 @@ els.randomizeBtn.addEventListener('click', () => {
         return false;
     };
 
-    // Xếp các cặp học sinh
+    // Xếp cặp học sinh có cùng preferredPair
+    utils.shuffleArray(Object.keys(studentsByPair));
     for (const pairId of Object.keys(studentsByPair)) {
         const pairStudents = studentsByPair[pairId];
         if (pairStudents.length < 2) {
-            pairStudents.forEach(student => unpairedStudents.push(student));
+            pairStudents.forEach(student => {
+                if (!assignedStudents.has(student.name)) unpairedStudents.push(student);
+            });
             continue;
         }
 
@@ -507,13 +645,10 @@ els.randomizeBtn.addEventListener('click', () => {
         const isMalePair = student1.gender === 'Nam' && student2.gender === 'Nam';
         const isMixedPair = !isFemalePair && !isMalePair;
 
-        if (isMixedPair) {
-            pairStudents.forEach(student => unpairedStudents.push(student));
-            continue;
-        }
-
-        if (assignedStudents.has(student1.name) || assignedStudents.has(student2.name)) {
-            pairStudents.forEach(student => unpairedStudents.push(student));
+        if (isMixedPair || assignedStudents.has(student1.name) || assignedStudents.has(student2.name)) {
+            pairStudents.forEach(student => {
+                if (!assignedStudents.has(student.name)) unpairedStudents.push(student);
+            });
             continue;
         }
 
@@ -522,6 +657,7 @@ els.randomizeBtn.addEventListener('click', () => {
         const availableGroups = isFemalePair ? ['group1', 'group4'] : ['group1', 'group2', 'group3', 'group4'];
 
         let assigned = false;
+        utils.shuffleArray(availableGroups);
         for (const group of availableGroups) {
             const validTables = tablesByGroup[group].filter(table => 
                 table.length >= 2 && isValidTableForStudents(table, [student1, student2], isFemalePair)
@@ -554,9 +690,13 @@ els.randomizeBtn.addEventListener('click', () => {
         }
 
         if (!assigned) {
-            pairStudents.forEach(student => unpairedStudents.push(student));
+            pairStudents.forEach(student => {
+                if (!assignedStudents.has(student.name)) unpairedStudents.push(student);
+            });
         }
-        pairStudents.slice(2).forEach(student => unpairedStudents.push(student));
+        pairStudents.slice(2).forEach(student => {
+            if (!assignedStudents.has(student.name)) unpairedStudents.push(student);
+        });
     }
 
     // Xếp học sinh theo thứ tự ưu tiên: CDEF nữ, AB nữ, AB nam, CDEF nam
@@ -576,6 +716,7 @@ els.randomizeBtn.addEventListener('click', () => {
             utils.shuffleArray(studentsToAssign);
             for (const student of studentsToAssign) {
                 let assigned = false;
+                utils.shuffleArray(allowedGroups);
                 for (const group of allowedGroups) {
                     if ((group === 'group1' || group === 'group4') && 
                         gender === 'male' && 
@@ -592,7 +733,7 @@ els.randomizeBtn.addEventListener('click', () => {
                         allowedGroups[0]
                     );
                     assigned = assignStudent(student, seats, targetGroup, gender === 'female' ? 'Nữ' : 'Nam');
-                    if (!assigned) {
+                    if (!assigned && !assignedStudents.has(student.name)) {
                         unpairedStudents.push(student);
                     }
                 }
@@ -639,19 +780,21 @@ els.randomizeBtn.addEventListener('click', () => {
         }
     });
 
-    // Kiểm tra số ghế đã sử dụng
+    // Kiểm tra kết quả
     const totalAssigned = assignedStudents.size;
+    const totalSeats = emptySeats.length;
+    const emptySeatCount = emptySeats.filter(seat => !seat.textContent).length;
     if (totalAssigned < students.length) {
         warningMessage = `Chỉ xếp được ${totalAssigned} học sinh, còn ${students.length - totalAssigned} học sinh chưa có chỗ!`;
-    } else if (totalAssigned === students.length && remainingSeats.length > 1) {
-        warningMessage = `Đã xếp đủ ${totalAssigned} học sinh, nhưng còn hơn một ghế trống (${remainingSeats.length})!`;
+    } else if (emptySeatCount !== 1) {
+        warningMessage = `Đã xếp ${totalAssigned} học sinh, nhưng còn ${emptySeatCount} ghế trống thay vì 1!`;
     }
 
-    // Lưu trạng thái và hiển thị thông báo
     utils.saveState();
-    utils.showToast(warningMessage || 'Đã xếp ngẫu nhiên chỗ ngồi theo giới tính, xếp hạng và yêu cầu bàn!', !!warningMessage);
+    utils.showToast(warningMessage || 'Đã xếp ngẫu nhiên chỗ ngồi, đảm bảo cặp preferredPair ngồi cùng bàn!', !!warningMessage);
 });
 
+// Sự kiện đặt lại sơ đồ
 els.resetBtn.addEventListener('click', () => {
     initStudentList();
     initSeatingChart();
@@ -664,6 +807,7 @@ els.resetBtn.addEventListener('click', () => {
     utils.showToast('Đã đặt lại sơ đồ!');
 });
 
+// Sự kiện undo
 els.undoBtn.addEventListener('click', () => {
     if (state.historyIndex > 0) {
         utils.loadState(state.historyIndex - 1);
@@ -671,6 +815,7 @@ els.undoBtn.addEventListener('click', () => {
     }
 });
 
+// Sự kiện redo
 els.redoBtn.addEventListener('click', () => {
     if (state.historyIndex < state.history.length - 1) {
         utils.loadState(state.historyIndex + 1);
@@ -678,8 +823,10 @@ els.redoBtn.addEventListener('click', () => {
     }
 });
 
+// Sự kiện lưu cấu hình
 els.saveBtn.addEventListener('click', saveConfiguration);
 
+// Toggle modal xuất file
 function toggleModal(show) {
     els.exportModal.classList.toggle('show', show);
     if (!show) {
@@ -691,117 +838,17 @@ function toggleModal(show) {
     }
 }
 
-function generateCanvas(title, callback) {
-    if (!els.seatingChart || els.seatingChart.offsetWidth === 0 || els.seatingChart.offsetHeight === 0) {
-        utils.showToast('Sơ đồ lớp học không hiển thị hoặc không tồn tại!', true);
-        console.error('Seating chart is not visible or does not exist.');
-        callback(null);
-        return;
-    }
-
-    const fontPromise = document.fonts.ready.catch(err => {
-        console.warn('Font loading failed, falling back to defaults:', err);
-        return Promise.resolve();
-    });
-
-    Promise.race([
-        fontPromise,
-        new Promise(resolve => setTimeout(resolve, 2000))
-    ]).then(() => {
-        const isMobile = window.innerWidth <= 768;
-        const scale = isMobile ? 1 : Math.max(1.5, Math.min(window.devicePixelRatio * 1.5, 2));
-
-        html2canvas(els.seatingChart, {
-            scale: scale,
-            backgroundColor: '#ffffff',
-            useCORS: true,
-            logging: false,
-            windowWidth: document.body.scrollWidth,
-            windowHeight: document.body.scrollHeight,
-            onclone: (document, element) => {
-                element.style.visibility = 'visible';
-                element.style.position = 'relative';
-                element.querySelectorAll('.desk, .seat-filled').forEach(el => {
-                    el.style.background = el.classList.contains('seat-filled') ? '#7AAEC6' : '#D4D2E9';
-                    el.style.fontFamily = 'Inter, Arial, sans-serif';
-                    el.style.fontWeight = '700';
-                    el.style.fontSize = '0.8rem';
-                    el.style.display = 'flex';
-                    el.style.alignItems = 'center';
-                    el.style.justifyContent = 'center';
-                    el.style.textAlign = 'center';
-                    el.style.whiteSpace = 'pre-wrap';
-                    el.style.wordBreak = 'normal';
-                    el.style.padding = '8px';
-                    el.style.boxSizing = 'border-box';
-                });
-                element.querySelectorAll('.table-label').forEach(el => {
-                    el.style.fontFamily = 'Inter, Arial, sans-serif';
-                    el.style.fontWeight = '700';
-                    el.style.fontSize = '1.1rem';
-                });
-            }
-        }).then(canvas => {
-            const padding = 60;
-            const titleHeight = 100;
-            const legendHeight = 120;
-            const newCanvas = document.createElement('canvas');
-            newCanvas.width = canvas.width + padding * 2;
-            newCanvas.height = canvas.height + titleHeight + legendHeight + padding * 2;
-            const ctx = newCanvas.getContext('2d');
-
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-
-            ctx.font = 'bold 25.6px Inter, Arial, sans-serif';
-            ctx.fillStyle = '#1A1A1A';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            const date = new Date().toLocaleString('vi-VN');
-            const titleText = `${title} - ${date}`;
-            let maxWidth = newCanvas.width - padding * 2;
-            let finalTitle = titleText;
-            if (ctx.measureText(titleText).width > maxWidth) {
-                finalTitle = titleText.substring(0, 50) + '...';
-            }
-            ctx.fillText(finalTitle, newCanvas.width / 2, padding + titleHeight / 2);
-
-            ctx.drawImage(canvas, padding, padding + titleHeight);
-
-            const legendY = canvas.height + titleHeight + padding + 40;
-            ctx.font = 'bold 16px Inter, Arial, sans-serif';
-            ctx.fillStyle = '#1A1A1A';
-            ctx.textAlign = 'left';
-            ctx.fillText('Xếp hạng:', padding, legendY);
-            const ratings = ['A', 'B', 'C', 'D', 'E', 'F'];
-            ratings.forEach((rating, index) => {
-                ctx.fillStyle = index < 2 ? '#4A90E2' : index < 4 ? '#F5A623' : '#E94E77';
-                ctx.fillRect(padding + index * 100, legendY + 10, 24, 24);
-                ctx.fillStyle = '#1A1A1A';
-                ctx.fillText(rating, padding + index * 100 + 30, legendY + 28);
-            });
-
-            callback(newCanvas);
-        }).catch(err => {
-            console.error('Canvas generation error:', err.message, err.stack);
-            utils.showToast('Lỗi khi tạo sơ đồ! Vui lòng kiểm tra kết nối mạng hoặc thử lại.', true);
-            callback(null);
-        });
-    }).catch(err => {
-        console.error('Font loading error:', err.message, err.stack);
-        utils.showToast('Lỗi khi tải font! Sử dụng font mặc định.', true);
-        callback(null);
-    });
-}
-
+// Sự kiện xuất file
 els.exportBtn.addEventListener('click', () => {
     toggleModal(true);
 });
 
+// Sự kiện hủy xuất
 els.cancelExportBtn.addEventListener('click', () => {
     toggleModal(false);
 });
 
+// Sự kiện xem trước
 els.previewBtn.addEventListener('click', () => {
     const title = els.exportTitle.value.trim() || 'Sơ đồ lớp học - Lớp 12A1';
     utils.setLoading(els.previewBtn, true);
@@ -816,38 +863,51 @@ els.previewBtn.addEventListener('click', () => {
     });
 });
 
+// Sự kiện xác nhận xuất PDF/PNG
 els.confirmExportBtn.addEventListener('click', () => {
     const title = els.exportTitle.value.trim() || 'Sơ đồ lớp học - Lớp 12A1';
-    const format = document.querySelector('input[name="exportFormat"]:checked').value;
+    const format = document.querySelector('input[name="exportFormat"]:checked')?.value || 'png';
     utils.setLoading(els.confirmExportBtn, true);
 
     generateCanvas(title, (newCanvas) => {
         if (!newCanvas) {
             utils.setLoading(els.confirmExportBtn, false);
-            toggleModal(false);
+            utils.showToast('Không thể tạo sơ đồ. Thử lại hoặc kiểm tra console.', true);
             return;
         }
 
         const date = new Date().toLocaleString('vi-VN');
         const fileName = `so-do-lop-hoc-${date.replace(/[\W]+/g, '-')}`;
 
-        if (format === 'pdf') {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF({
-                orientation: newCanvas.width > newCanvas.height ? 'landscape' : 'portrait',
-                unit: 'px',
-                format: [newCanvas.width, newCanvas.height]
-            });
-            const imgData = newCanvas.toDataURL('image/png');
-            pdf.addImage(imgData, 'PNG', 0, 0, newCanvas.width, newCanvas.height);
-            pdf.save(`${fileName}.pdf`);
-            utils.showToast('Đã xuất PDF sơ đồ lớp học!');
-        } else {
-            const link = document.createElement('a');
-            link.download = `${fileName}.png`;
-            link.href = newCanvas.toDataURL('image/png', 1.0);
-            link.click();
-            utils.showToast('Đã xuất ảnh sơ đồ lớp học dưới dạng PNG!');
+        try {
+            if (format === 'pdf') {
+                const { jsPDF } = window.jspdf;
+                if (!jsPDF) {
+                    throw new Error('jsPDF chưa load');
+                }
+                const pdfWidth = 210; // A4 width in mm
+                const pdfHeight = 297; // A4 height in mm
+                const imgWidth = pdfWidth - 20;
+                const imgHeight = (newCanvas.height / newCanvas.width) * imgWidth;
+                let pdf = new jsPDF({
+                    orientation: newCanvas.width > newCanvas.height ? 'landscape' : 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                const imgData = newCanvas.toDataURL('image/png', 0.95);
+                pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                pdf.save(`${fileName}.pdf`);
+                utils.showToast('Đã xuất PDF sơ đồ lớp học!');
+            } else {
+                const link = document.createElement('a');
+                link.download = `${fileName}.png`;
+                link.href = newCanvas.toDataURL('image/png', 0.95);
+                link.click();
+                utils.showToast('Đã xuất ảnh sơ đồ lớp học dưới dạng PNG!');
+            }
+        } catch (err) {
+            console.error('Export error:', err);
+            utils.showToast(`Lỗi xuất file: ${err.message}. Kiểm tra thư viện jsPDF/html2canvas.`, true);
         }
 
         utils.setLoading(els.confirmExportBtn, false);
@@ -855,6 +915,7 @@ els.confirmExportBtn.addEventListener('click', () => {
     });
 });
 
+// Sự kiện kéo thả học sinh từ danh sách
 els.studentList.addEventListener('dragover', (e) => e.preventDefault());
 els.studentList.addEventListener('drop', (e) => {
     e.preventDefault();
@@ -883,19 +944,27 @@ els.studentList.addEventListener('drop', (e) => {
     }
 });
 
+// Khôi phục cấu hình đã lưu
 const savedConfig = localStorage.getItem('seatingChart');
 if (savedConfig) {
-    const seatingData = JSON.parse(savedConfig);
-    initStudentList();
-    initSeatingChart();
-    document.querySelectorAll('[data-seat]').forEach(seat => {
-        seat.textContent = seatingData[seat.dataset.seat] || '';
-        seat.classList.toggle('seat-filled', !!seat.textContent);
-        if (seat.textContent) {
-            updateStudentList(seat.textContent);
-        }
-    });
-    utils.saveState();
+    try {
+        const seatingData = JSON.parse(savedConfig);
+        initStudentList();
+        initSeatingChart();
+        document.querySelectorAll('[data-seat]').forEach(seat => {
+            seat.textContent = seatingData[seat.dataset.seat] || '';
+            seat.classList.toggle('seat-filled', !!seat.textContent);
+            if (seat.textContent) {
+                updateStudentList(seat.textContent);
+            }
+        });
+        utils.saveState();
+    } catch (err) {
+        console.error('Lỗi khôi phục cấu hình:', err);
+        utils.showToast('Lỗi khôi phục cấu hình từ localStorage.', true);
+        initStudentList();
+        initSeatingChart();
+    }
 } else {
     initStudentList();
     initSeatingChart();
