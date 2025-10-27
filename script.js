@@ -791,7 +791,7 @@ els.randomizeBtn.addEventListener('click', () => {
     }
 
     utils.saveState();
-    utils.showToast(warningMessage || 'Đã xếp ngẫu nhiên chỗ ngồi, đảm bảo cặp preferredPair ngồi cùng bàn!', !!warningMessage);
+    utils.showToast(warningMessage || 'Đã xếp ngẫu nhiên chỗ ngồi!', !!warningMessage);
 });
 
 // Sự kiện đặt lại sơ đồ
@@ -896,14 +896,17 @@ els.confirmExportBtn.addEventListener('click', () => {
                 });
                 const imgData = newCanvas.toDataURL('image/png', 0.95);
                 pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                // Thêm title vào PDF
+                pdf.setFontSize(16);
+                pdf.text(title, 10, 8);
                 pdf.save(`${fileName}.pdf`);
-                utils.showToast('Đã xuất PDF sơ đồ lớp học!');
+                utils.showToast('Đã xuất PDF sơ đồ lớp học hoàn chỉnh!');
             } else {
                 const link = document.createElement('a');
                 link.download = `${fileName}.png`;
                 link.href = newCanvas.toDataURL('image/png', 0.95);
                 link.click();
-                utils.showToast('Đã xuất ảnh sơ đồ lớp học dưới dạng PNG!');
+                utils.showToast('Đã xuất ảnh sơ đồ lớp học hoàn chỉnh dưới dạng PNG!');
             }
         } catch (err) {
             console.error('Export error:', err);
@@ -914,6 +917,57 @@ els.confirmExportBtn.addEventListener('click', () => {
         toggleModal(false);
     });
 });
+
+// Hàm generateCanvas nâng cấp - Capture toàn trang, chất lượng cao, thêm title
+function generateCanvas(title, callback) {
+    // Thêm class export-mode để bypass scale
+    document.body.classList.add('export-mode');
+
+    // Delay để CSS áp dụng (bypass scale)
+    setTimeout(() => {
+        const elementToCapture = document.querySelector('.classroom-bg'); // Capture toàn trang (hoàn chỉnh)
+
+        if (!elementToCapture) {
+            console.error('Element .classroom-bg không tìm thấy');
+            document.body.classList.remove('export-mode');
+            callback(null);
+            return;
+        }
+
+        // Tùy chọn html2canvas chất lượng cao
+        const options = {
+            scale: 3, // Tăng độ phân giải cao (thay vì 2)
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: '#FFFFFF', // Nền trắng sạch
+            width: elementToCapture.scrollWidth,
+            height: elementToCapture.scrollHeight,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: elementToCapture.scrollWidth,
+            windowHeight: elementToCapture.scrollHeight,
+            logging: false // Tắt log để nhanh hơn
+        };
+
+        html2canvas(elementToCapture, options).then((canvas) => {
+            // Thêm title lên canvas để đẹp hơn
+            const ctx = canvas.getContext('2d');
+            ctx.font = 'bold 24px Inter, sans-serif';
+            ctx.fillStyle = '#5D4037'; // Màu text ấm
+            ctx.textAlign = 'center';
+            ctx.fillText(title, canvas.width / 2, 40); // Vẽ title ở trên
+
+            console.log('Canvas hoàn chỉnh created:', canvas.width, 'x', canvas.height);
+            document.body.classList.remove('export-mode');
+            callback(canvas);
+        }).catch((err) => {
+            console.error('html2canvas error:', err);
+            document.body.classList.remove('export-mode');
+            callback(null);
+        });
+    }, 300); // Delay 300ms để đảm bảo CSS và elements load
+}
+
 
 // Sự kiện kéo thả học sinh từ danh sách
 els.studentList.addEventListener('dragover', (e) => e.preventDefault());
