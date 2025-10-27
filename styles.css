@@ -1,44 +1,63 @@
+/* Căn chỉnh các biến màu sắc và thêm các biến mới để tăng tính linh hoạt */
 :root {
-    --primary-bg: linear-gradient(135deg, #D5DEE6 0%, #B3C3D5 100%);
-    --desk-bg: linear-gradient(135deg, #D4D2E9 0%, #D5D3DE 50%, #AEBCE0 100%);
-    --seat-filled-bg: linear-gradient(135deg, #ACC5D1 0%, #7AAEC6 100%);
-    --card-bg: linear-gradient(135deg, #DBE0EB 0%, #C0C4C9 100%);
-    --blackboard-bg: linear-gradient(135deg, #6f8894 0%, #6d84a7 100%);
-    --toast-bg: linear-gradient(135deg, #306692 0%, #7396C6 100%);
-    --toast-error-bg: linear-gradient(135deg, #8fa2cf 0%, #9a96c4 100%);
-    --border-brown: #637c8d;
-    --border-gold: #c7e1f0;
-    --text-dark: #23343e;
-    --text-accent: #607ea5;
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.25);
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --radius: 16px;
+    /* Màu sắc chính được tối ưu hóa cho độ tương phản tốt hơn */
+    --primary-bg: linear-gradient(135deg, #E0E7EF 0%, #B9C7DD 100%);
+    --desk-bg: linear-gradient(135deg, #D8D6EC 0%, #D9D7E2 50%, #B3C1E5 100%);
+    --seat-filled-bg: linear-gradient(135deg, #B3CCDA 0%, #85B8D0 100%);
+    --card-bg: linear-gradient(135deg, #E2E8F0 0%, #C7CCD3 100%);
+    --blackboard-bg: linear-gradient(135deg, #5A7483 0%, #5B7A9B 100%);
+    --toast-bg: linear-gradient(135deg, #2B5A8A 0%, #6A8DB8 100%);
+    --toast-error-bg: linear-gradient(135deg, #A3B2D8 0%, #A7A2D0 100%);
+    
+    /* Biến viền và bóng */
+    --border-brown: #5A7080;
+    --border-gold: #D1E6F5;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+    
+    /* Biến giao diện */
+    --text-dark: #1E2D37;
+    --text-accent: #547092;
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --radius: 12px; /* Giảm radius để giao diện hiện đại hơn */
+    --spacing-unit: 1rem; /* Biến mới cho khoảng cách đồng nhất */
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Reset và style cơ bản */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    font-family: 'Inter', Arial, sans-serif;
+    font-family: var(--font-primary);
     background: var(--primary-bg);
-    margin: 0;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     color: var(--text-dark);
     line-height: 1.6;
     background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
+/* Container chính */
 .classroom-bg {
-    padding: 1rem;
+    padding: var(--spacing-unit);
     width: 100%;
-    max-width: 1400px;
+    max-width: 100vw; /* Đặt max-width là 100vw để vừa màn hình */
     margin: 0 auto;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
+    gap: var(--spacing-unit);
 }
 
+/* Style cho desk */
 .desk {
     background: var(--desk-bg);
     border: 3px solid var(--border-brown);
@@ -48,115 +67,104 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.875rem;
+    font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     position: relative;
     text-align: center;
-    white-space: normal;
-    word-break: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .desk:hover {
-    transform: translateY(-5px) scale(1.05);
+    transform: translateY(-4px) scale(1.03);
     box-shadow: var(--shadow-md);
     border-color: var(--border-gold);
 }
 
 .desk.drag-over {
     border-color: var(--text-accent);
-    box-shadow: 0 0 16px rgba(0, 174, 255, 0.6);
-    transform: scale(1.08);
+    box-shadow: 0 0 12px rgba(0, 174, 255, 0.5);
+    transform: scale(1.05);
 }
 
 .seat-filled {
     background: var(--seat-filled-bg);
     color: var(--text-dark);
-    font-weight: 800;
+    font-weight: 700;
     border-color: var(--border-gold);
     box-shadow: var(--shadow-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    white-space: normal;
-    word-break: normal;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* Style cho student card */
 .student-card {
     background: var(--card-bg);
     border: 2px solid var(--border-gold);
     border-radius: var(--radius);
     box-shadow: var(--shadow-sm);
-    padding: 10px;
-    height: 50px;
+    padding: 0.75rem;
+    height: 56px; /* Tăng chiều cao nhẹ để cân đối */
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 600;
     cursor: grab;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
     transition: var(--transition);
 }
 
 .student-card:hover {
-    transform: translateY(-3px) scale(1.03);
+    transform: translateY(-2px) scale(1.02);
     box-shadow: var(--shadow-md);
 }
 
 .student-card:active {
     cursor: grabbing;
-    transform: scale(0.97);
+    transform: scale(0.98);
 }
 
+/* Blackboard được tối ưu hóa */
 .blackboard {
     background: var(--blackboard-bg);
     color: #fff;
-    border: 4px solid #374f5d;
+    border: 4px solid var(--border-brown);
     border-radius: var(--radius);
-    padding: 1rem;
+    padding: var(--spacing-unit);
     text-align: center;
     box-shadow: var(--shadow-lg);
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    flex: 0 0 auto;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
+/* Seating chart được cải tiến */
 #seatingChart {
-    background: linear-gradient(135deg, #FFFFFF 0%, #F9F9F9 100%);
-    padding: 1.5rem;
+    background: linear-gradient(135deg, #F8FAFC 0%, #F0F2F5 100%);
+    padding: calc(var(--spacing-unit) * 1.5);
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    border: 2px solid #e0e0e0;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--spacing-unit);
+    border: 1px solid #e5e7eb;
     flex: 1;
     overflow-y: auto;
+    height: 100%; /* Đảm bảo chiếm hết chiều cao */
 }
 
-.group {
-    min-width: 0;
-}
-
-.table-label {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-accent);
-    text-align: center;
-    margin-bottom: 0.5rem;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
+/* Toast notification */
 .toast {
     position: fixed;
-    bottom: 1rem;
-    right: 1rem;
+    top: var(--spacing-unit);
+    right: var(--spacing-unit);
     background: var(--toast-bg);
     color: white;
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     border-radius: var(--radius);
     box-shadow: var(--shadow-md);
     opacity: 0;
@@ -166,6 +174,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    max-width: 90%;
 }
 
 .toast.show {
@@ -177,41 +186,49 @@ body {
     background: var(--toast-error-bg);
 }
 
+/* Button styles */
 button {
-    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+    background: linear-gradient(135deg, #3B82F6 0%, #2B6CB0 100%);
     color: white;
     border: none;
-    padding: 10px 16px;
+    padding: 0.75rem 1.25rem;
     border-radius: var(--radius);
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
     box-shadow: var(--shadow-sm);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
 button:hover {
-    background: linear-gradient(135deg, #357ABD 0%, #2C5AA0 100%);
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, #2B6CB0 0%, #1E4A8A 100%);
+    transform: translateY(-1px);
     box-shadow: var(--shadow-md);
 }
 
 button:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
 }
 
+/* Style riêng cho nút trong tools-panel (hàng dọc) */
+.tool-button {
+    width: 100%; /* Làm nút rộng hết container để xếp dọc đẹp */
+    justify-content: center; /* Căn giữa nội dung */
+    margin-bottom: 0.5rem; /* Khoảng cách giữa các nút */
+}
+
+/* Animations */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideIn {
-    from { opacity: 0; transform: translateX(100px); }
+    from { opacity: 0; transform: translateX(80px); }
     to { opacity: 1; transform: translateX(0); }
 }
 
@@ -219,42 +236,48 @@ button:disabled {
     animation: fadeIn 0.5s ease;
 }
 
+/* Layout containers - Nâng cấp để vừa màn hình với layout 3 cột: trái (danh sách), giữa (sơ đồ), phải (công cụ) */
 .main-container {
     display: flex;
     flex-direction: column;
     flex: 1;
-    gap: 1rem;
-    height: calc(100vh - 80px);
+    gap: var(--spacing-unit);
+    min-height: calc(100vh - 80px);
+    width: 100%; /* Đảm bảo chiếm hết chiều rộng */
 }
 
-.sidebar {
-    flex: 0 0 30%;
-    background: white/90;
-    padding: 1rem;
+.sidebar, .seating-area, .tools-panel {
+    background: rgba(255, 255, 255, 0.95);
+    padding: var(--spacing-unit);
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
     overflow-y: auto;
     max-height: 100%;
 }
 
-.seating-area {
-    flex: 1;
-    background: white/90;
-    padding: 1rem;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+.sidebar {
+    flex: 0 0 300px; /* Bên trái: danh sách, width cố định */
 }
 
+.seating-area {
+    flex: 1; /* Giữa: sơ đồ lớp, chiếm không gian còn lại */
+    display: flex;
+    flex-direction: column;
+}
+
+.tools-panel {
+    flex: 0 0 250px; /* Bên phải: thanh công cụ, width cố định */
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-unit);
+    /* Các nút sẽ xếp dọc tự nhiên trong container này */
+}
+
+/* Loading overlay */
 .loading-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -270,26 +293,19 @@ button:disabled {
 }
 
 .loading-spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #4A90E2;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid #3B82F6;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
+    width: 48px;
+    height: 48px;
+    animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
+/* Modal styles */
 .modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -308,9 +324,8 @@ button:disabled {
     background: white;
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
-    padding: 1.5rem;
-    width: 90%;
-    max-width: 600px;
+    padding: calc(var(--spacing-unit) * 1.5);
+    width: min(90%, 640px);
     max-height: 80vh;
     overflow-y: auto;
     position: relative;
@@ -319,7 +334,7 @@ button:disabled {
 .modal-content h2 {
     font-size: 1.5rem;
     font-weight: 700;
-    margin-bottom: 1rem;
+    margin-bottom: var(--spacing-unit);
     color: var(--text-dark);
 }
 
@@ -333,23 +348,30 @@ button:disabled {
 .modal-content input[type="text"] {
     width: 100%;
     padding: 0.5rem;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: var(--spacing-unit);
+    transition: border-color 0.2s ease;
+}
+
+.modal-content input[type="text"]:focus {
+    outline: none;
+    border-color: var(--text-accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .modal-content .radio-group {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: var(--spacing-unit);
+    margin-bottom: var(--spacing-unit);
 }
 
 .modal-content .preview-container {
-    margin-bottom: 1rem;
-    max-height: 300px;
+    margin-bottom: var(--spacing-unit);
+    max-height: 320px;
     overflow: auto;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
     display: none;
 }
@@ -366,34 +388,45 @@ button:disabled {
     justify-content: flex-end;
 }
 
+/* Responsive design - Nâng cấp để layout 3 cột hoạt động tốt trên các kích thước màn hình */
 @media (max-width: 768px) {
     .desk {
-        height: 70px;
-        font-size: 0.7rem;
-        white-space: normal;
-        word-break: normal;
+        height: 64px;
+        font-size: 0.75rem;
     }
     .student-card {
-        height: 45px;
-        font-size: 0.85rem;
+        height: 48px;
+        font-size: 0.75rem;
     }
     .blackboard {
         padding: 0.75rem;
     }
     #seatingChart {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     }
     .modal-content {
         width: 95%;
-        padding: 1rem;
+        padding: var(--spacing-unit);
+    }
+    .sidebar, .tools-panel {
+        flex: 0 0 auto; /* Trên mobile, cho phép co giãn tự nhiên */
+    }
+    .main-container {
+        flex-direction: column; /* Stack trên mobile */
     }
 }
 
 @media (min-width: 1024px) {
     .main-container {
-        flex-direction: row;
+        flex-direction: row; /* Layout ngang trên desktop */
     }
     #seatingChart {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Tự động điều chỉnh cột */
+    }
+}
+
+@media (min-width: 1440px) {
+    #seatingChart {
+        grid-template-columns: repeat(6, 1fr); /* Tăng số cột cho màn hình rất lớn */
     }
 }
