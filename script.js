@@ -1,6 +1,4 @@
 // Danh sách học sinh ban đầu (43 học sinh)
-// Thay đổi rating: 'A' , đổi 'B/C/D/E/F' để xếp tỉ lệ ngồi gần bàn đầu
-// Ví dụ  preferredPair: '01' } để cài thành cặp ngồi gần nhau, đang lỗi chỉ dùng được cho nam
 let students = [
     { id: '001', name: 'Quỳnh Anh', gender: 'Nữ', rating: 'A', preferredPair: '' },
     { id: '002', name: 'Đức Anh', gender: 'Nam', rating: 'A', preferredPair: '' },
@@ -971,4 +969,3 @@ if (savedConfig) {
     initStudentList();
     initSeatingChart();
 }
-
