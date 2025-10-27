@@ -1,7 +1,7 @@
 let students = [
     { id: '001', name: 'Quỳnh Anh', gender: 'Nữ', rating: 'A', preferredPair: '' },
     { id: '002', name: 'Đức Anh', gender: 'Nam', rating: 'A', preferredPair: '' },
-    { id: '003', name: 'Hải Anh', gender: 'Nam', rating: 'A', preferredPair: '' },
+    { id: '003', name: 'Hải Anh', gender: 'Nữ', rating: 'A', preferredPair: '' },
     { id: '004', name: 'Quang Anh', gender: 'Nam', rating: 'A', preferredPair: '' },
     { id: '005', name: 'Hải Băng', gender: 'Nữ', rating: 'A', preferredPair: '' },
     { id: '006', name: 'Thị Bình', gender: 'Nữ', rating: 'A', preferredPair: '' },
@@ -40,7 +40,7 @@ let students = [
     { id: '039', name: 'Yến Vi', gender: 'Nữ', rating: 'A', preferredPair: '' },
     { id: '040', name: 'Khánh Vy', gender: 'Nữ', rating: 'A', preferredPair: '' },
     { id: '041', name: 'Như Ý', gender: 'Nữ', rating: 'A', preferredPair: '' },
-    { id: '042', name: 'Minh Anh', gender: 'Nữ', rating: 'A', preferredPair: '01' },
+    { id: '042', name: 'Minh Anh', gender: 'Nữ', rating: 'A', preferredPair: '1' },
     { id: '043', name: 'Thu Hiền', gender: 'Nữ', rating: 'A', preferredPair: '01' }
 ].sort((a, b) => a.name.localeCompare(b.name, 'vi'));
 
