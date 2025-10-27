@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý vị trí học sinh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="classroom-bg">
+    <div class="blackboard fade-in">
+        <h1 class="text-xl md:text-3xl font-bold">Sơ đồ lớp học - Quản lý vị trí học sinh</h1>
+    </div>
+    <div class="main-container mx-auto">
+        <div class="sidebar">
+            <h2 class="text-lg font-bold mb-3 text-center text-gray-800">Danh sách học sinh</h2>
+            <div class="flex gap-2 mb-3">
+                <input id="searchInput" type="text" placeholder="Tìm kiếm học sinh..." class="w-full p-2 border-none rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500" aria-label="Tìm kiếm học sinh">
+                <input id="fileInput" type="file" accept=".csv,.xlsx" class="hidden">
+                <button id="uploadBtn" class="bg-orange-500 text-white px-3 py-2 rounded-lg hover:bg-orange-600 transition flex items-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    Tải File
+                </button>
+            </div>
+            <div id="studentList" class="grid grid-cols-1 gap-2"></div>
+        </div>
+        <div class="seating-area">
+            <div id="seatingChart" class="relative">
+                <div class="absolute top-[-40px] left-1/2 transform -translate-x-1/2 bg-orange-500 text-white text-center py-1 px-4 rounded-lg shadow-lg font-semibold text-sm">Bàn giáo viên</div>
+                <div class="group">
+                    <h3 class="table-label">Tổ 1</h3>
+                    <div id="group1" class="space-y-4"></div>
+                </div>
+                <div class="group">
+                    <h3 class="table-label">Tổ 2</h3>
+                    <div id="group2" class="space-y-4"></div>
+                </div>
+                <div class="group">
+                    <h3 class="table-label">Tổ 3</h3>
+                    <div id="group3" class="space-y-4"></div>
+                </div>
+                <div class="group">
+                    <h3 class="table-label">Tổ 4</h3>
+                    <div id="group4" class="space-y-4"></div>
+                </div>
+            </div>
+            <div class="flex flex-wrap justify-center gap-2 p-2 bg-white/90 rounded-b-2xl">
+                <button id="undoBtn" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition flex items-center gap-2" disabled>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"></path></svg>
+                    Hoàn tác
+                </button>
+                <button id="redoBtn" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition flex items-center gap-2" disabled>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3"></path></svg>
+                    Làm lại
+                </button>
+                <button id="randomizeBtn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004 9H0m0 6h4a8.001 8.001 0 0115.418 2M20 20v-5h.582"></path></svg>
+                    Xếp ngẫu nhiên
+                </button>
+                <button id="resetBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    Đặt lại
+                </button>
+                <button id="saveBtn" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                    Lưu cấu hình
+                </button>
+                <button id="exportBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Xuất ảnh/PDF
+                </button>
+            </div>
+        </div>
+        <div id="toast" class="toast"></div>
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="loading-spinner"></div>
+        </div>
+        <div id="exportModal" class="modal">
+            <div class="modal-content">
+                <h2>Xuất sơ đồ lớp học</h2>
+                <label for="exportTitle">Tiêu đề:</label>
+                <input type="text" id="exportTitle" placeholder="Nhập tiêu đề (VD: Sơ đồ lớp học - Lớp 12A1)" value="Sơ đồ lớp học - Lớp 12A1">
+                <label>Định dạng xuất:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="exportFormat" value="png" checked> PNG</label>
+                    <label><input type="radio" name="exportFormat" value="pdf"> PDF</label>
+                </div>
+                <div id="previewContainer" class="preview-container">
+                    <img id="previewImage" alt="Xem trước sơ đồ">
+                </div>
+                <div class="button-group">
+                    <button id="previewBtn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Xem trước</button>
+                    <button id="confirmExportBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">Xuất</button>
+                    <button id="cancelExportBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Hủy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
